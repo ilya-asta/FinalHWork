@@ -158,5 +158,92 @@ EOF
    соответствовать классам "Pets" и "Pack animals", и в этих таблицах будут поля,
    которые характеризуют каждый тип животных (например, имена, даты
    рождения, выполняемые команды и т.д.).
+   В ранее подключенном MySQL создать базу данных с названием
+   "Human Friends".
+- Создать таблицы, соответствующие иерархии из вашей диаграммы
+  классов.
+- Заполнить таблицы данными о животных, их командах и датами
+  рождения
+```` roomsql 
+-- Создание таблицы Pets
+CREATE TABLE IF NOT EXISTS Pets (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255),
+    Type VARCHAR(255),
+    BirthDate DATE,
+    Commands VARCHAR(255)
+);
+
+-- Заполнение таблицы Pets данными
+INSERT INTO Pets (Name, Type, BirthDate, Commands) VALUES 
+('Artur', 'Dog', '2020-01-01', 'Sit, Stay, Fetch'),
+('Ilya', 'Cat', '2019-05-15', 'Sit, Pounce'),
+('Masha', 'Hamster', '2021-03-10', 'Roll, Hide'),
+('Emir', 'Dog', '2018-12-10', 'Sit, Paw, Bark');
+
+-- Создание таблицы PackAnimals
+CREATE TABLE IF NOT EXISTS PackAnimals (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255),
+    Type VARCHAR(255),
+    BirthDate DATE,
+    Commands VARCHAR(255)
+);
+
+-- Заполнение таблицы PackAnimals данными
+INSERT INTO PackAnimals (Name, Type, BirthDate, Commands) VALUES 
+('Kate', 'Horse', '2015-07-21', 'Trot, Canter, Gallop'),
+('Sasha', 'Camel', '2016-11-03', 'Walk, Carry Load'),
+('Alex', 'Donkey', '2017-09-18', 'Walk, Carry Load, Bray'),
+('Messi', 'Horse', '2014-05-05', 'Trot, Canter'),
+('Ovechkin', 'Camel', '2018-12-12', 'Walk, Sit'),
+('Biden', 'Donkey', '2019-01-23', 'Walk, Bray, Kick');
+````
+- Удалить записи о верблюдах и объединить таблицы лошадей и ослов.
+```` roomsql 
+-- Удаление записей о верблюдах:
+DELETE FROM PackAnimals WHERE Type = 'Camel' OR Type = 'Donkey';
+
+-- Объединение таблиц лошадей и ослов:
+CREATE TABLE HorsesAndDonkeys AS
+SELECT * FROM PackAnimals WHERE Type = 'Horse'
+UNION ALL
+SELECT * FROM PackAnimals WHERE Type = 'Donkey';
+````
+- Создать новую таблицу для животных в возрасте от 1 до 3 лет и вычислить
+  их возраст с точностью до месяца.
+```` roomsql 
+-- создадим новую таблицу для животных в возрасте от 1 до 3 лет и вычислим их возраст с точностью до месяца:
+CREATE TABLE AnimalsAgeBetween1And3 AS
+SELECT *, TIMESTAMPDIFF(YEAR, BirthDate, CURDATE()) AS AgeInYears,--  Это выражение вычисляет разницу в годах между датой рождения животного (BirthDate) и текущей датой (CURDATE()),
+--  и присваивает результат новому столбцу с именем AgeInYears 
+
+TIMESTAMPDIFF(MONTH, BirthDate, CURDATE()) % 12 AS AgeInMonths -- Это выражение вычисляет разницу в месяцах между датой рождения животного (BirthDate) и текущей датой (CURDATE())
+-- , затем берет остаток от деления на 12,
+--  чтобы получить количество месяцев в текущем году, и присваивает результат новому столбцу с именем AgeInMonths. 
+
+FROM (SELECT * FROM Pets
+      UNION ALL --  UNION ALL используется для объединения данных из двух таблиц без удаления дубликатов. 
+      SELECT * FROM HorsesAndDonkeys) AS AllAnimals
+WHERE TIMESTAMPDIFF(YEAR, BirthDate, CURDATE()) BETWEEN 1 AND 3; -- Это условие фильтрации данных. Здесь выбираются только те записи, 
+-- у которых возраст животного (вычисленный в предыдущих выражениях) находится в диапазоне от 1 до 3 лет.
+````
+- Объединить все созданные таблицы в одну, сохраняя информацию о
+  принадлежности к исходным таблицам.
+```` roomsql
+--  объединим все созданные таблицы в одну, сохраняя информацию о принадлежности к исходным таблицам. 
+-- Для этого нужно будет добавить столбец, указывающий на тип животного: 
+ALTER TABLE Pets ADD AnimalType VARCHAR(50) DEFAULT 'Pet';
+ALTER TABLE HorsesAndDonkeys ADD AnimalType VARCHAR(50) DEFAULT 'PackAnimal';
+
+INSERT INTO AnimalsAgeBetween1And3 (ID, Name, Type, BirthDate, Commands, AgeInYears, AgeInMonths, AnimalType)
+SELECT ID, Name, Type, BirthDate, Commands, AgeInYears, AgeInMonths, AnimalType FROM Pets;
+INSERT INTO AnimalsAgeBetween1And3 (ID, Name, Type, BirthDate, Commands, AgeInYears, AgeInMonths, AnimalType)
+SELECT ID, Name, Type, BirthDate, Commands, AgeInYears, AgeInMonths, AnimalType FROM HorsesAndDonkeys;
+````
+
+
+
+
 
 
