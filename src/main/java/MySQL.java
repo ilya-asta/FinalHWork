@@ -1,3 +1,6 @@
+// Создал жтот класс в самом начале когда пытался подключиться к SQL через Idea, у меня в принципе получилось,
+// но потом понял что жто мне не нужно)) но все равно пока оставил
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
