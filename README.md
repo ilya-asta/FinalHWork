@@ -242,6 +242,8 @@ INSERT INTO AnimalsAgeBetween1And3 (ID, Name, Type, BirthDate, Commands, AgeInYe
 SELECT ID, Name, Type, BirthDate, Commands, AgeInYears, AgeInMonths, AnimalType FROM HorsesAndDonkeys;
 ````
 
+## Написать программу, имитирующую работу реестра домашних животных.
+main класс этой программы [Ссылка на класс main](src/main/java/AnimalRegistry.java#main)
 
 
 
